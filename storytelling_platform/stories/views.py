@@ -3,6 +3,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Story, Chapter, Comment  # Make sure Story is imported here
 from .forms import StoryForm, ChapterForm, CommentForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.shortcuts import render, redirect
+from .models import UserProfile
 
 
 
@@ -13,6 +17,31 @@ def story_list(request):
 def story_detail(request, pk):
     story = get_object_or_404(Story, pk=pk)
     return render(request, 'stories/story_detail.html', {'story': story})
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            auth_login(request, user)
+            return redirect('story_list')  # Redirect to story list after signup
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            auth_login(request, user)
+            return redirect('story_list')  # Redirect to story list after login
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout(request):
+    auth_logout(request)
+    return redirect('story_list')  # Redirect to story list after logout
 
 @login_required
 def story_create(request):
@@ -72,3 +101,20 @@ def comment_create(request, story_id, chapter_id=None):
     else:
         form = CommentForm()
     return render(request, 'stories/comment_form.html', {'form': form, 'story': story, 'chapter': chapter})
+
+@login_required
+def profile(request):
+    user_profile = UserProfile.objects.get_or_create(user=request.user)[0]
+    return render(request, 'profile.html', {'profile': user_profile})
+
+@login_required
+def edit_profile(request):
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('profile')
+    else:
+        form = ProfileForm(instance=user_profile)
+    return render(request, 'edit_profile.html', {'form': form})
