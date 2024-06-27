@@ -1,7 +1,10 @@
-Project Name
-============
+Storytelling Platform
+=====================
 
-Brief description or introduction of your project.
+### Description
+
+The Storytelling Platform is a web application designed to allow users to create, share, and discover stories. It provides a platform where writers can publish their narratives, readers can explore diverse genres, and interactions through comments enhance community engagement. The platform supports user authentication, story creation, commenting, and social sharing features.
+
 
 Table of Contents
 -----------------
@@ -19,12 +22,6 @@ Table of Contents
 
 Project Overview
 ----------------
-Storytelling Platform
----------------------
-
-### Description
-
-The Storytelling Platform is a web application designed to allow users to create, share, and discover stories. It provides a platform where writers can publish their narratives, readers can explore diverse genres, and interactions through comments enhance community engagement. The platform supports user authentication, story creation, commenting, and social sharing features.
 
 ### Key Features
 
