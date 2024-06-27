@@ -116,11 +116,11 @@ To get a local copy up and running, follow these simple steps.
 
 1.  Clone the repository:
 
-    `git clone https://github.com/yourusername/yourproject.git`
+    `git clone https://github.com/13virat/StoryMode.git`
 
 2.  Navigate into the project directory:
 
-    `cd yourproject`
+    `cd storytelling_platform`
 
 3.  Install dependencies:
 
