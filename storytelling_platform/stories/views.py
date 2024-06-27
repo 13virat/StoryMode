@@ -10,21 +10,30 @@ from .models import UserProfile
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.views.decorators.cache import cache_page
 
 
 
 @login_required
+@cache_page(60 * 15)
 def story_list(request):
-    stories = Story.objects.all()
+    stories = Story.objects.select_related('author').all()
     paginator = Paginator(stories, 10)  # Show 10 stories per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'stories/story_list.html', {'page_obj': page_obj})
 
-
+@cache_page(60 * 15)
 def story_detail(request, pk):
-    story = get_object_or_404(Story, pk=pk)
-    return render(request, 'stories/story_detail.html', {'story': story})
+    story = get_object_or_404(Story.objects.select_related('author'), pk=pk)
+    chapters = Chapter.objects.filter(story=story).select_related('story')
+    comments = Comment.objects.filter(story=story).select_related('author', 'chapter')
+    context = {
+        'story': story,
+        'chapters': chapters,
+        'comments': comments,
+    }
+    return render(request, 'stories/story_detail.html', context)
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
