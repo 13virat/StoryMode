@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>New Comment Notification</title>
+</head>
+<body>
+    <p>Hi {{ comment.story.author.username }},</p>
+    <p>{{ comment.author.username }} has commented on your story "<strong>{{ comment.story.title }}</strong>".</p>
+    <p>Comment:</p>
+    <p>{{ comment.content }}</p>
+    <p><a href="{% url 'story_detail' comment.story.id %}">View the story</a></p>
+    <p>Best regards,<br/>Storytelling Platform Team</p>
+</body>
+</html>

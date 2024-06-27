@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.views.decorators.cache import cache_page
+from .notifications import send_comment_notification
+
 
 
 
@@ -177,3 +179,26 @@ def user_dashboard(request):
         'user_comments': user_comments,
     }
     return render(request, 'stories/user_dashboard.html', context)
+def add_comment(request, story_id, chapter_id=None):
+    story = get_object_or_404(Story, id=story_id)
+    chapter = get_object_or_404(Chapter, id=chapter_id) if chapter_id else None
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.story = story
+            comment.chapter = chapter
+            comment.author = request.user
+            comment.save()
+            send_comment_notification(comment)  # Send notification
+            return redirect('story_detail', story_id=story.id)
+    else:
+        form = CommentForm()
+
+    context = {
+        'form': form,
+        'story': story,
+        'chapter': chapter,
+    }
+    return render(request, 'stories/add_comment.html', context)
