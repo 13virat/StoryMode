@@ -1,0 +1,11 @@
+<!-- stories/templates/stories/story_detail.html -->
+
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>{{ story.title }}</h1>
+  <p>{{ story.content }}</p>
+  <p>by {{ story.author }}</p>
+  <p>Created at: {{ story.created_at }}</p>
+  <a href="{% url 'story_edit' story.pk %}">Edit</a>
+{% endblock %}
