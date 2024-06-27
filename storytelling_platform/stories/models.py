@@ -1,5 +1,7 @@
 
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.text import slugify
@@ -31,9 +33,9 @@ class Chapter(models.Model):
 
 class Comment(models.Model):
     content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='authored_comments')  # Specify unique related_name
-    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name='story_comments')  # Use a different related_name
-    chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE, null=True, blank=True, related_name='chapter_comments')  # Use a different related_name
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
+    story = models.ForeignKey('Story', on_delete=models.CASCADE, related_name='story_comments')
+    chapter = models.ForeignKey('Chapter', on_delete=models.CASCADE, null=True, blank=True, related_name='chapter_comments')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -41,6 +43,15 @@ class Comment(models.Model):
             return f'Comment by {self.author.username} on Chapter "{self.chapter.title}"'
         else:
             return f'Comment by {self.author.username} on Story "{self.story.title}"'
+
+@receiver(post_save, sender=Comment)
+def send_comment_notification(sender, instance, **kwargs):
+    subject = f'New Comment on {instance.story.title}'
+    message = f'Hi {instance.story.author.username},\n\n{instance.author.username} commented on your story "{instance.story.title}".\n\nRead it here: example.com/{instance.story.pk}/\n\nBest regards,\nStorytelling Platform Team'
+    sender_email = 'your-email@example.com'
+    recipient_list = [instance.story.author.email]
+    send_mail(subject, message, sender_email, recipient_list, fail_silently=True)
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')  # Unique related_name

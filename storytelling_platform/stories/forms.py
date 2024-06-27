@@ -1,5 +1,5 @@
 from django import forms
-from .models import Story, Chapter, Comment
+from .models import Story, Chapter, Comment,UserProfile
 
 class StoryForm(forms.ModelForm):
     class Meta:
@@ -14,4 +14,9 @@ class ChapterForm(forms.ModelForm):
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['content']        
+        fields = ['content']   
+
+class UserProfileForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile  
+        fields = ['bio', 'profile_picture']            

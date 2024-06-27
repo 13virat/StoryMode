@@ -1,18 +1,26 @@
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Story, Chapter, Comment  # Make sure Story is imported here
-from .forms import StoryForm, ChapterForm, CommentForm
+from .models import Story, Chapter, Comment, UserProfile  # Make sure Story is imported here
+from .forms import StoryForm, ChapterForm, CommentForm, UserProfileForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.shortcuts import render, redirect
 from .models import UserProfile
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 
+@login_required
 def story_list(request):
     stories = Story.objects.all()
-    return render(request, 'stories/story_list.html', {'stories': stories})
+    paginator = Paginator(stories, 10)  # Show 10 stories per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'stories/story_list.html', {'page_obj': page_obj})
+
 
 def story_detail(request, pk):
     story = get_object_or_404(Story, pk=pk)
@@ -118,3 +126,36 @@ def edit_profile(request):
     else:
         form = ProfileForm(instance=user_profile)
     return render(request, 'edit_profile.html', {'form': form})
+@login_required
+def user_profile(request, username):
+    user = get_object_or_404(User, username=username)
+    profile = get_object_or_404(UserProfile, user=user)
+    return render(request, 'stories/user_profile.html', {'profile': profile})
+
+@login_required
+def edit_profile(request):
+    profile = get_object_or_404(UserProfile, user=request.user)
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile', username=request.user.username)
+    else:
+        form = UserProfileForm(instance=profile)
+    return render(request, 'stories/edit_profile.html', {'form': form})
+
+@login_required
+def search(request):
+    query = request.GET.get('q')
+    stories = Story.objects.filter(title__icontains=query)
+    chapters = Chapter.objects.filter(title__icontains=query)
+    comments = Comment.objects.filter(content__icontains=query)
+    return render(request, 'stories/search_results.html', {'stories': stories, 'chapters': chapters, 'comments': comments})
+
+def story_search(request):
+    query = request.GET.get('q')
+    if query:
+        results = Story.objects.filter(Q(title__icontains=query) | Q(content__icontains=query))
+    else:
+        results = Story.objects.all()
+    return render(request, 'stories/story_search.html', {'results': results, 'query': query})

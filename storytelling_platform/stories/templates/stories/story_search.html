@@ -1,0 +1,17 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+    Search Results
+{% endblock %}
+
+{% block content %}
+    <h1>Search Results</h1>
+    <p>Showing results for "{{ query }}":</p>
+    <ul>
+        {% for story in results %}
+            <li><a href="{% url 'story_detail' story.pk %}">{{ story.title }}</a></li>
+        {% empty %}
+            <li>No results found.</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block title %}{{ profile.user.username }}'s Profile{% endblock %}
+
+{% block content %}
+  <h1>{{ profile.user.username }}'s Profile</h1>
+  <p>Bio: {{ profile.bio }}</p>
+  {% if profile.profile_picture %}
+    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture">
+  {% endif %}
+  <!-- Additional profile details -->
+{% endblock %}
