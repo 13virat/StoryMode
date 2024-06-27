@@ -159,3 +159,12 @@ def story_search(request):
     else:
         results = Story.objects.all()
     return render(request, 'stories/story_search.html', {'results': results, 'query': query})
+@login_required
+def user_dashboard(request):
+    user_stories = Story.objects.filter(author=request.user)
+    user_comments = Comment.objects.filter(author=request.user)
+    context = {
+        'user_stories': user_stories,
+        'user_comments': user_comments,
+    }
+    return render(request, 'stories/user_dashboard.html', context)

@@ -3,18 +3,34 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.utils.text import slugify
 
 class Story(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='authored_stories')  # Unique related_name
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='stories')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        permissions = [
+            ('can_publish_story', 'Can publish story'),
+            ('can_edit_story', 'Can edit own story'),
+            ('can_delete_story', 'Can delete own story'),
+        ]
 
     def __str__(self):
         return self.title
+
+@receiver(post_save, sender=Story)
+def send_story_creation_notification(sender, instance, created, **kwargs):
+    if created:
+        subject = f'New Story Created: {instance.title}'
+        message = f'Hi {instance.author.username},\n\nYour new story "{instance.title}" has been successfully created on Storytelling Platform.\n\nRead it here: example.com/{instance.pk}/\n\nBest regards,\nStorytelling Platform Team'
+        sender_email = 'your-email@example.com'
+        recipient_list = [instance.author.email]
+        send_mail(subject, message, sender_email, recipient_list, fail_silently=True)
 
 class Chapter(models.Model):
     title = models.CharField(max_length=200)
